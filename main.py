@@ -131,7 +131,10 @@ class ActivityWatchPeek(Star):
                 continue
 
             try:
-                await self.context.send_message(umo, [Comp.Plain(text)])
+                from astrbot.api.event import MessageChain
+                chain = MessageChain()
+                chain.message(text)
+                await self.context.send_message(umo, chain)
             except Exception as e:
                 logger.warning(f"activitywatch_peek send to {group_id} failed: {e}")
 
