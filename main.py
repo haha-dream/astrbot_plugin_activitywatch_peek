@@ -1,5 +1,4 @@
 import asyncio
-import hashlib
 import json
 
 import httpx
@@ -93,13 +92,18 @@ class ActivityWatchPeek(Star):
                 logger.warning(f"activitywatch_peek invalid json: {e}")
                 return
 
-        payload_hash = self._hash_payload(payload)
+        current_app_title = self._extract_app_title(payload)
 
         async with self._kv_lock:
-            last_hash = await self.get_kv_data("last_payload_hash", "")
-            if last_hash == payload_hash:
+            last_app_title = await self.get_kv_data("last_app_title", {})
+            if not isinstance(last_app_title, dict):
+                last_app_title = {}
+
+            if last_app_title.get("app") == current_app_title.get(
+                "app"
+            ) and last_app_title.get("title") == current_app_title.get("title"):
                 return
-            await self.put_kv_data("last_payload_hash", payload_hash)
+            await self.put_kv_data("last_app_title", current_app_title)
 
         await self._push_update(payload)
 
@@ -132,6 +136,7 @@ class ActivityWatchPeek(Star):
 
             try:
                 from astrbot.api.event import MessageChain
+
                 chain = MessageChain()
                 chain.message(text)
                 await self.context.send_message(umo, chain)
@@ -220,11 +225,12 @@ class ActivityWatchPeek(Star):
         return set(parts)
 
     @staticmethod
-    def _hash_payload(payload: object) -> str:
-        payload_str = json.dumps(
-            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        )
-        return hashlib.sha256(payload_str.encode("utf-8")).hexdigest()
+    def _extract_app_title(payload: object) -> dict:
+        if isinstance(payload, dict):
+            app = payload.get("app")
+            title = payload.get("title")
+            return {"app": app, "title": title}
+        return {"app": None, "title": None}
 
     @staticmethod
     def _format_payload(payload: object) -> str:
