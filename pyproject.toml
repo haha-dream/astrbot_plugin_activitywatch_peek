@@ -1,6 +1,6 @@
 [project]
 name = "astrbot-plugin-activitywatch-peek"
-version = "v1.0.0"
+version = "v1.0.1"
 description = "利用 ActivityWatch 拉取你当前的焦点进程并推送，与 aw-peek 配合使用"
 requires-python = ">=3.12"
 dependencies = [

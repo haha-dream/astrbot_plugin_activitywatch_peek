@@ -14,7 +14,7 @@ from astrbot.api.star import Context, Star, register
     "astrbot_plugin_activitywatch_peek",
     "haha-dream",
     "利用 ActivityWatch 拉取你当前的焦点进程并推送，与 aw-peek 配合使用",
-    "v1.0.0",
+    "v1.0.1",
 )
 class ActivityWatchPeek(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
