@@ -121,15 +121,66 @@ class ActivityWatchPeek(Star):
         for group_id in enabled_groups:
             umo = group_umo_map.get(str(group_id))
             if not umo:
-                logger.warning(
-                    f"activitywatch_peek group {group_id} has no unified_msg_origin yet"
+                pushed = await self._try_push_aiocqhttp_group(
+                    group_id=str(group_id), text=text
                 )
+                if not pushed:
+                    logger.warning(
+                        f"activitywatch_peek group {group_id} has no unified_msg_origin yet"
+                    )
                 continue
 
             try:
                 await self.context.send_message(umo, [Comp.Plain(text)])
             except Exception as e:
                 logger.warning(f"activitywatch_peek send to {group_id} failed: {e}")
+
+    async def _try_push_aiocqhttp_group(self, group_id: str, text: str) -> bool:
+        if not group_id.isdigit():
+            return False
+
+        try:
+            platform = self.context.get_platform(filter.PlatformAdapterType.AIOCQHTTP)
+        except Exception:
+            return False
+
+        if not platform:
+            return False
+
+        try:
+            from astrbot.api.event import MessageChain
+            from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
+                AiocqhttpMessageEvent,
+            )
+        except Exception:
+            return False
+
+        try:
+            bot = platform.get_client()
+        except Exception:
+            return False
+
+        chain = MessageChain()
+        try:
+            chain = chain.message(text)
+        except Exception:
+            try:
+                chain.chain = [Comp.Plain(text)]
+            except Exception:
+                return False
+
+        try:
+            await AiocqhttpMessageEvent.send_message(
+                bot=bot,
+                message_chain=chain,
+                event=None,
+                is_group=True,
+                session_id=group_id,
+            )
+            return True
+        except Exception as e:
+            logger.warning(f"activitywatch_peek aiocqhttp push failed: {e}")
+            return False
 
     def _get_interval_seconds(self) -> float:
         try:

@@ -3,7 +3,7 @@
     "description": "要启用的群聊 ID 列表",
     "type": "list",
     "hint": "",
-    "default": "[]"
+    "default": ""
   },
   "remote_url": {
     "description": "远端 JSON 文件地址",
