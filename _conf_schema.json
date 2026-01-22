@@ -1,0 +1,22 @@
+{
+  "enabled_groups": {
+    "description": "要启用的群聊 ID 列表",
+    "type": "text",
+    "hint": "支持 JSON 数组（如 [\"123\",\"456\"]）或逗号/换行分隔",
+    "default": "[]",
+    "editor_mode": true,
+    "editor_language": "json"
+  },
+  "remote_url": {
+    "description": "远端 JSON 文件地址",
+    "type": "string",
+    "hint": "必须以 http 或 https 开头",
+    "default": ""
+  },
+  "interval_seconds": {
+    "description": "拉取间隔（秒）",
+    "type": "int",
+    "hint": "多少秒触发一次",
+    "default": 60
+  }
+}
